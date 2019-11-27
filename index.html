@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="style/style.css">
+  <script src="https://use.fontawesome.com/a6abf7c5b8.js"></script>
+  <title>Document</title>
+</head>
+<body>
+
+
+
+<div class="app">
+  <form class="login_form" v-if="showFormRegistration">
+  <div class="form-group">
+    <label for="exampleInputEmail1">Почтовый адрес:</label>
+    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Введите почтовый адрес">
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Пароль:</label>
+    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Пароль">
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary"
+    v-on:click="showFormRegistration = !showFormRegistration">Войти</button>
+    <button type="submit" class="btn btn-primary"
+    v-on:click="showFormRegistration = !showFormRegistration" >Зарегистрироваться</button>
+  </div>
+</form>
+<header>
+  <div class="userName">{{ userName }}</div>
+  <button class="btn btn-primary" type="submit"
+  v-on:click="showFormRegistration = true">Выйти</button>
+</header>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"> {{ headerModal }} </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <span v-if="renderModalContent">
+              {{ textModal }}
+           </span>
+           <textarea name="name" rows="4" cols="63"
+           v-if="!renderModalContent"
+           v-model="changedText"
+           ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+          <button type="button" class="btn btn-primary"
+          data-dismiss="modal"
+          v-on:click="btnModalFunction(); setAlertContent('deleteElement')"
+          v-if="renderModalContent"
+          > Удалить </button>
+          <button type="button" class="btn btn-primary"
+          data-dismiss="modal"
+          v-on:click="saveEdition(); setAlertContent('saveEditionButton')"
+          v-if="!renderModalContent"
+          > Сохранить </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-primary" role="alert"
+       v-show="showAlert">
+  {{ alertContent }}
+</div>
+
+  <div class="listsSideBlock">
+    <div class="select-box">
+      <select name="" id="" class="custom-select" v-on:change="needSort">
+        <option value="1">Все</option>
+        <option value="2">Неисполненные</option>
+        <option value="3">Исполненные</option>
+      </select>
+    </div>
+    <ul class="list-group">
+      <li
+      class="list-block list-group-item list-group-item-action"
+      v-for="(list, index) of listsArray"
+      v-show="listsArray[index].showList"
+      v-on:click="activeListIndex = index; editList = true"
+      v-bind:class="[listStyle(index), {'active-list' : activeListIndex == index}]"
+      >
+        <p> {{ listsArray[index].nameList }}</p>
+        <i class="fa fa-edit editContent"
+          data-toggle="modal" data-target="#exampleModal"
+          v-on:click="editIconNumber = 1; editModalContent()"
+
+        ></i>
+        <i
+        class="fa fa-times deleteClass"
+        data-toggle="modal" data-target="#exampleModal"
+        v-on:click="crossNumber = 1; modalContent(index)"
+        ></i>
+      </li>
+    </ul>
+    <div class="add-list-block">
+      <form action="" id="data">
+        <input
+        type="text"
+        class="add-list-field rounded"
+        v-model="setListName"
+        >
+      </form>
+        <button
+        form="data"
+        type="reset"
+        class="add-list btn btn-primary btn-sm"
+        v-on:click="createList(); setAlertContent('listButton')"
+        value="listButton"
+        >Добавить список</button>
+
+    </div>
+  </div>
+
+  <div class="cardsSideBlock">
+      <h1 class="list-name"> {{ listsArray.length > 0 ? listsArray[activeListIndex].nameList : '' }}</h1>
+      <ul class="list-group" v-if="listsArray.length > 0">
+        <li
+        class="card-block list-group-item list-group-item-action"
+        v-for="(card, index) of listsArray[activeListIndex].cardsOfList"
+        v-on:click="activeCardIndex = index; editList = false"
+        >
+          <div class="cardCheckboxContainer">
+            <input type="checkbox"
+            v-on:change="setStatusCard($event, index)"
+            v-bind:checked="card.done">
+          </div>
+          <label for="hurry">
+            <p
+            v-bind:class="{urgently : card.priority}"> </p></label>
+          <div class="cardText">
+            <p> {{ card.content }}</p>
+
+          </div>
+          <div class="time">
+            {{ listsArray[activeListIndex].cardsOfList[index].time }}
+          </div>
+          <i class="fa fa-edit editContent"
+          data-toggle="modal" data-target="#exampleModal"
+          v-on:click="editIconNumber = 2; editModalContent()"
+          ></i>
+          <i
+          class="fa fa-times deleteClass"
+          data-toggle="modal" data-target="#exampleModal"
+          v-on:click="crossNumber = 2; modalContent(index) "
+          ></i>
+        </li>
+      </ul>
+      <div class="createCardsBlock">
+        <form action="" id="data">
+          <textarea
+          rows="3" cols="60"
+          type="text"
+          class="add-list-field rounded"
+          v-model="setCardName"
+
+          ></textarea>
+        </form>
+          <button
+          form="data"
+          type="reset"
+          class="add-card btn btn-primary btn-sm"
+          v-on:click="createCard(); setAlertContent('cardButton')"
+          value="cardButton"
+          >Добавить дело</button>
+          <input type="checkbox" v-on:click="priority = !priority">
+          <p>Срочное</p>
+      </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
